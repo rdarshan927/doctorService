@@ -118,7 +118,7 @@ public class DoctorController {
     public ResponseEntity<List<SlotResponse>> getSlotsByDate(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable UUID id,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
 
         requireAuthenticated(authHeader);
         return ResponseEntity.ok(doctorService.getSlotsByDate(id, date));

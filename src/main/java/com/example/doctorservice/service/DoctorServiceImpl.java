@@ -123,14 +123,15 @@ public class DoctorServiceImpl implements DoctorService {
     @Override
     @Transactional(readOnly = true)
     public List<SlotResponse> getSlotsByDate(UUID doctorId, LocalDate date) {
-        log.debug("Fetching slots for doctor id={} on {}", doctorId, date);
+        LocalDate effectiveDate = (date != null) ? date : LocalDate.now();
+        log.debug("Fetching slots for doctor id={} on {}", doctorId, effectiveDate);
 
         if (!doctorRepository.existsById(doctorId)) {
             throw new DoctorNotFoundException(doctorId);
         }
 
         return slotRepository
-                .findByDoctorIdAndDateOrderByStartTimeAsc(doctorId, date)
+                .findByDoctorIdAndDateOrderByStartTimeAsc(doctorId, effectiveDate)
                 .stream()
                 .map(this::toSlotResponse)
                 .collect(Collectors.toList());
