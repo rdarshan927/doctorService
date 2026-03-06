@@ -47,9 +47,33 @@ public class DoctorController {
             @RequestHeader("Authorization") String authHeader,
             @Valid @RequestBody DoctorRequest request) {
 
-        requireRole(authHeader, "ADMIN", "RECEPTIONIST");
+        requireRole(authHeader, "ADMIN", "RECEPTIONIST", "DOCTOR");
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(doctorService.createDoctor(request));
+    }
+
+    // ── PUT /api/doctors/{id} (full update + optional verify) ─────────────
+
+    @PutMapping("/{id}")
+    public ResponseEntity<DoctorResponse> updateDoctor(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable UUID id,
+            @RequestBody DoctorRequest request) {
+
+        requireRole(authHeader, "ADMIN", "RECEPTIONIST");
+        return ResponseEntity.ok(doctorService.updateDoctor(id, request));
+    }
+
+    // ── PATCH /api/doctors/{id}/verify (toggle verified only) ─────────────
+
+    @PatchMapping("/{id}/verify")
+    public ResponseEntity<DoctorResponse> verifyDoctor(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable UUID id,
+            @RequestBody VerifyRequest request) {
+
+        requireRole(authHeader, "ADMIN", "RECEPTIONIST");
+        return ResponseEntity.ok(doctorService.verifyDoctor(id, request.isVerified()));
     }
 
     // ── GET /api/doctors ───────────────────────────────────────────────────
@@ -98,6 +122,18 @@ public class DoctorController {
 
         requireAuthenticated(authHeader);
         return ResponseEntity.ok(doctorService.getSlotsByDate(id, date));
+    }
+
+    // ── PATCH /api/doctors/{id}/link-user ─────────────────────────────────
+
+    @PatchMapping("/{id}/link-user")
+    public ResponseEntity<DoctorResponse> linkUser(
+            @RequestHeader("Authorization") String authHeader,
+            @PathVariable UUID id,
+            @RequestBody LinkUserRequest request) {
+
+        requireRole(authHeader, "ADMIN", "RECEPTIONIST");
+        return ResponseEntity.ok(doctorService.linkUser(id, request.getUserId()));
     }
 
     // ── Auth helpers ───────────────────────────────────────────────────────

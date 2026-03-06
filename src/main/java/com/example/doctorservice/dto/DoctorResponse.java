@@ -27,5 +27,6 @@ public class DoctorResponse {
     private String department;
     private int yearsOfExperience;
     private boolean isActive;
+    private boolean verified;
     private LocalDateTime createdAt;
 }

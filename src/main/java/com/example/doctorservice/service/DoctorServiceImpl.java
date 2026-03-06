@@ -137,6 +137,73 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // LINK USER ACCOUNT
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @Override
+    @Transactional
+    public DoctorResponse linkUser(UUID doctorId, UUID userId) {
+        log.info("Linking userId={} to doctorId={}", userId, doctorId);
+        Doctor doctor = doctorRepository.findById(doctorId)
+                .orElseThrow(() -> new DoctorNotFoundException(doctorId));
+        doctor.setUserId(userId);
+        return toDoctorResponse(doctorRepository.save(doctor));
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // UPDATE DOCTOR (receptionist fills professional details + verifies)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @Override
+    @Transactional
+    public DoctorResponse updateDoctor(UUID id, DoctorRequest request) {
+        log.info("Updating doctor id={}", id);
+        Doctor doctor = doctorRepository.findById(id)
+                .orElseThrow(() -> new DoctorNotFoundException(id));
+
+        // When verifying, specialization and licenseNumber become mandatory
+        if (request.isVerified()) {
+            if (request.getSpecialization() == null || request.getSpecialization().isBlank())
+                throw new IllegalArgumentException("Specialization is required to verify a doctor");
+            if (request.getLicenseNumber() == null || request.getLicenseNumber().isBlank())
+                throw new IllegalArgumentException("License number is required to verify a doctor");
+        }
+
+        // Check for duplicate email only if the email changed
+        if (request.getEmail() != null
+                && !request.getEmail().equalsIgnoreCase(doctor.getEmail())
+                && doctorRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateDoctorEmailException(request.getEmail());
+        }
+
+        if (request.getName() != null && !request.getName().isBlank())             doctor.setName(request.getName());
+        if (request.getEmail() != null && !request.getEmail().isBlank())            doctor.setEmail(request.getEmail());
+        if (request.getSpecialization() != null && !request.getSpecialization().isBlank()) doctor.setSpecialization(request.getSpecialization());
+        if (request.getPhone() != null)                                             doctor.setPhone(request.getPhone());
+        if (request.getLicenseNumber() != null && !request.getLicenseNumber().isBlank()) doctor.setLicenseNumber(request.getLicenseNumber());
+        if (request.getDepartment() != null)                                        doctor.setDepartment(request.getDepartment());
+        if (request.getUserId() != null)                                            doctor.setUserId(request.getUserId());
+        doctor.setYearsOfExperience(request.getYearsOfExperience());
+        doctor.setVerified(request.isVerified());
+
+        return toDoctorResponse(doctorRepository.save(doctor));
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // VERIFY DOCTOR (quick toggle)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    @Override
+    @Transactional
+    public DoctorResponse verifyDoctor(UUID id, boolean verified) {
+        log.info("Setting verified={} for doctorId={}", verified, id);
+        Doctor doctor = doctorRepository.findById(id)
+                .orElseThrow(() -> new DoctorNotFoundException(id));
+        doctor.setVerified(verified);
+        return toDoctorResponse(doctorRepository.save(doctor));
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // Mappers
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -152,6 +219,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .department(d.getDepartment())
                 .yearsOfExperience(d.getYearsOfExperience())
                 .isActive(d.isActive())
+                .verified(d.isVerified())
                 .createdAt(d.getCreatedAt())
                 .build();
     }

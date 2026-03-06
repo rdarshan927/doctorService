@@ -35,4 +35,23 @@ public interface DoctorService {
      * Used by GET /api/doctors/{id}/slots?date=YYYY-MM-DD.
      */
     List<SlotResponse> getSlotsByDate(UUID doctorId, LocalDate date);
+
+    /**
+     * Link (or update) the user-service account UUID on an existing doctor profile.
+     * Called by PATCH /api/doctors/{id}/link-user.
+     */
+    DoctorResponse linkUser(UUID doctorId, UUID userId);
+
+    /**
+     * Full update of a doctor profile (used by receptionist during verification).
+     * When request.isVerified() == true the service enforces that specialization
+     * and licenseNumber are non-blank.
+     */
+    DoctorResponse updateDoctor(UUID id, DoctorRequest request);
+
+    /**
+     * Toggle the verified flag only (quick approve / revoke by admin or receptionist).
+     * Called by PATCH /api/doctors/{id}/verify.
+     */
+    DoctorResponse verifyDoctor(UUID id, boolean verified);
 }

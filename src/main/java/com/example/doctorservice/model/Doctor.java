@@ -64,6 +64,11 @@ public class Doctor {
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
+    /** False until a receptionist or admin reviews and approves the doctor profile. */
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean verified = false;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

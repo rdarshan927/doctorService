@@ -25,7 +25,7 @@ public class DoctorRequest {
     @NotBlank(message = "Name is required")
     private String name;
 
-    @NotBlank(message = "Specialization is required")
+    /** Nullable until receptionist verifies — allows creating an unverified stub. */
     private String specialization;
 
     @Email(message = "Email must be valid")
@@ -34,11 +34,17 @@ public class DoctorRequest {
 
     private String phone;
 
-    @NotBlank(message = "License number is required")
+    /** Nullable until receptionist verifies — must be unique once set. */
     private String licenseNumber;
 
     private String department;
 
     @Min(value = 0, message = "Years of experience cannot be negative")
     private int yearsOfExperience;
+
+    /**
+     * Set to true only by ADMIN or RECEPTIONIST after reviewing the application.
+     * Defaults to false on creation.
+     */
+    private boolean verified;
 }
