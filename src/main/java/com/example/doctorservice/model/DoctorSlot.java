@@ -57,32 +57,13 @@ public class DoctorSlot {
     @Builder.Default
     private SlotStatus status = SlotStatus.AVAILABLE;
 
-    /**
-     * UUID of the patient who reserved this slot.
-     * Populated by the appointment-service via POST /slots/{id}/reserve.
-     * Cleared when the slot is released (saga compensation).
-     */
     @Column(name = "reserved_by")
     private UUID reservedBy;
 
-    /**
-     * UUID of the appointment that holds this slot.
-     * Populated by the appointment-service; used in saga compensation.
-     */
     @Column(name = "appointment_id")
     private UUID appointmentId;
-
-    /**
-     * Optimistic locking version — prevents double-booking under concurrent requests.
-     */
-    @Version
-    private Long version;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 }

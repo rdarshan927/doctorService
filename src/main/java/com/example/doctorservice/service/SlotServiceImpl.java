@@ -8,8 +8,6 @@ import com.example.doctorservice.model.DoctorSlot;
 import com.example.doctorservice.model.SlotStatus;
 import com.example.doctorservice.repository.DoctorSlotRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,7 +15,6 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class SlotServiceImpl implements SlotService {
 
     private final DoctorSlotRepository slotRepository;
@@ -29,29 +26,15 @@ public class SlotServiceImpl implements SlotService {
     @Override
     @Transactional
     public SlotResponse reserveSlot(UUID slotId, ReserveSlotRequest request) {
-        log.info("Reserving slot id={} for patient={}", slotId, request.getPatientId());
-
-        try {
-            // SELECT ... FOR UPDATE — blocks concurrent reservation of the same slot
-            DoctorSlot slot = slotRepository.findByIdForUpdate(slotId)
-                    .orElseThrow(() -> new SlotNotFoundException(slotId));
-
-            if (slot.getStatus() != SlotStatus.AVAILABLE) {
-                throw new SlotNotAvailableException(slotId);
-            }
-
-            slot.setStatus(SlotStatus.RESERVED);
-            slot.setReservedBy(request.getPatientId());
-            slot.setAppointmentId(request.getAppointmentId());
-
-            return toSlotResponse(slotRepository.save(slot));
-
-        } catch (ObjectOptimisticLockingFailureException e) {
-            // Optimistic lock conflict — slot was concurrently reserved
-            log.warn("Concurrent reservation attempt for slot id={}", slotId);
-            throw new SlotNotAvailableException(
-                    "Slot " + slotId + " was just reserved by another request. Please try a different slot.");
+        DoctorSlot slot = slotRepository.findById(slotId)
+                .orElseThrow(() -> new SlotNotFoundException(slotId));
+        if (slot.getStatus() != SlotStatus.AVAILABLE) {
+            throw new SlotNotAvailableException(slotId);
         }
+        slot.setStatus(SlotStatus.RESERVED);
+        slot.setReservedBy(request.getPatientId());
+        slot.setAppointmentId(request.getAppointmentId());
+        return toSlotResponse(slotRepository.save(slot));
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -61,16 +44,11 @@ public class SlotServiceImpl implements SlotService {
     @Override
     @Transactional
     public SlotResponse releaseSlot(UUID slotId) {
-        log.info("Releasing slot id={} (saga compensation)", slotId);
-
         DoctorSlot slot = slotRepository.findById(slotId)
                 .orElseThrow(() -> new SlotNotFoundException(slotId));
-
-        // Idempotent: releasing an already-available slot is a no-op
         slot.setStatus(SlotStatus.AVAILABLE);
         slot.setReservedBy(null);
         slot.setAppointmentId(null);
-
         return toSlotResponse(slotRepository.save(slot));
     }
 

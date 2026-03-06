@@ -1,24 +1,16 @@
 package com.example.doctorservice.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
-/**
- * Represents a doctor profile in the clinic system.
- * <p>
- * {@code userId} is an optional link back to the user-service (same UUID that
- * Supabase Auth assigns). It is NOT enforced as a foreign key because the
- * doctor and user schemas live in different service boundaries.
- */
 @Entity
-@Table(name = "doctors")   // stored in the "doctor" schema (see application.yml → default_schema)
+@Table(name = "doctors")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -31,22 +23,15 @@ public class Doctor {
     @Column(updatable = false, nullable = false)
     private UUID id;
 
-    /**
-     * Optional reference to the matching user-service UUID.
-     * Allows linking a DOCTOR-role user to their doctor profile.
-     */
     @Column(name = "user_id")
     private UUID userId;
 
-    @NotBlank
     @Column(nullable = false)
     private String name;
 
-    @NotBlank
     @Column(nullable = false)
     private String specialization;
 
-    @Email
     @Column(nullable = false, unique = true)
     private String email;
 
@@ -64,7 +49,6 @@ public class Doctor {
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
-    /** False until a receptionist or admin reviews and approves the doctor profile. */
     @Builder.Default
     @Column(nullable = false)
     private boolean verified = false;
@@ -73,7 +57,7 @@ public class Doctor {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Transient
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<DoctorSlot> slots;
 }

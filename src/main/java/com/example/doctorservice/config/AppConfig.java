@@ -14,10 +14,6 @@ public class AppConfig {
         return new RestTemplate();
     }
 
-    /**
-     * Permissive CORS for development / API gateway deployments.
-     * Lock this down to specific origins in production.
-     */
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
