@@ -87,4 +87,3 @@ public class DoctorController {
         return ResponseEntity.ok(doctorService.linkUser(id, userId));
     }
 }
-/mnt/Academic/Y4S1/CTSE/lab6/Microservices-Architectural-Patterns

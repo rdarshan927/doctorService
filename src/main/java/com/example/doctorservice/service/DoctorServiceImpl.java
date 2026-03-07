@@ -110,3 +110,5 @@ public class DoctorServiceImpl implements DoctorService {
         List<DoctorSlot> availableSlots = slotRepository.findAvailableByDoctorAndDate(doctorId, effectiveDate);
         doctor.setSlots(availableSlots);
         return doctor;
+    }
+}
