@@ -28,49 +28,49 @@ public class DoctorController {
     // post
     @PostMapping
     public ResponseEntity<Doctor> createDoctor(@RequestHeader("Authorization") String authHeader, @RequestBody Doctor doctor) {
-        requireRole(authHeader, "ADMIN", "RECEPTIONIST", "DOCTOR");
+        authHelper.requireRole(authHeader, "ADMIN", "RECEPTIONIST", "DOCTOR");
         return ResponseEntity.status(HttpStatus.CREATED).body(doctorService.createDoctor(doctor));
     }
 
     // put
     @PutMapping("/{id}")
     public ResponseEntity<Doctor> updateDoctor(@RequestHeader("Authorization") String authHeader, @PathVariable UUID id, @RequestBody Doctor doctor) {
-        requireRole(authHeader, "ADMIN", "RECEPTIONIST");
+        authHelper.requireRole(authHeader, "ADMIN", "RECEPTIONIST");
         return ResponseEntity.ok(doctorService.updateDoctor(id, doctor));
     }
 
     // patch
     @PatchMapping("/{id}/verify")
     public ResponseEntity<Doctor> verifyDoctor(@RequestHeader("Authorization") String authHeader, @PathVariable UUID id, @RequestParam boolean verified) {
-        requireRole(authHeader, "ADMIN", "RECEPTIONIST");
+        authHelper.requireRole(authHeader, "ADMIN", "RECEPTIONIST");
         return ResponseEntity.ok(doctorService.verifyDoctor(id, verified));
     }
 
     // get
     @GetMapping
     public ResponseEntity<List<Doctor>> getAllDoctors(@RequestHeader("Authorization") String authHeader, @RequestParam(required = false) String specialization, @RequestParam(required = false) String department) {
-        requireAuthenticated(authHeader);
+        authHelper.requireAuthenticated(authHeader);
         return ResponseEntity.ok(doctorService.getAllDoctors(specialization, department));
     }
 
     // getDoctorById
     @GetMapping("/{id}")
     public ResponseEntity<Doctor> getDoctorById(@RequestHeader("Authorization") String authHeader, @PathVariable UUID id) {
-        requireAuthenticated(authHeader);
+        authHelper.requireAuthenticated(authHeader);
         return ResponseEntity.ok(doctorService.getDoctorById(id));
     }
 
     // post
     @PostMapping("/{id}/slots")
     public ResponseEntity<List<DoctorSlot>> createSlots(@RequestHeader("Authorization") String authHeader, @PathVariable UUID id, @RequestBody List<DoctorSlot> slots) {
-        requireRole(authHeader, "ADMIN", "DOCTOR", "RECEPTIONIST");
+        authHelper.requireRole(authHeader, "ADMIN", "DOCTOR", "RECEPTIONIST");
         return ResponseEntity.status(HttpStatus.CREATED).body(doctorService.createSlots(id, slots));
     }
 
     // getSlotById
     @GetMapping("/{id}/slots")
     public ResponseEntity<List<DoctorSlot>> getSlotsByDate(@RequestHeader("Authorization") String authHeader, @PathVariable UUID id, @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        requireAuthenticated(authHeader);
+        authHelper.requireAuthenticated(authHeader);
         return ResponseEntity.ok(doctorService.getSlotsByDate(id, date));
     }
 
@@ -83,7 +83,7 @@ public class DoctorController {
     // patch
     @PatchMapping("/{id}/link-user")
     public ResponseEntity<Doctor> linkUser(@RequestHeader("Authorization") String authHeader, @PathVariable UUID id, @RequestParam UUID userId) {
-        requireAuth(authHeader);
+        authHelper.requireAuth(authHeader);
         return ResponseEntity.ok(doctorService.linkUser(id, userId));
     }
 }

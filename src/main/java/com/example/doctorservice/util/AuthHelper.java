@@ -29,7 +29,7 @@ public class AuthHelper {
     public void requireRole(String authHeader, String... roles) {
         requireAuth(authHeader);
         TokenValidationResponse auth = userServiceClient.validateToken(stripBearer(authHeader));
-        if (auth.getRole() == null || Arrays.stream(roles).noneMatch(role -> role.equals(auth.getRole().name()))) {
+        if (auth.getRole() == null || Arrays.stream(roles).noneMatch(role -> role.equals(auth.getRole()))) {
             throw new UnauthorizedException("Insufficient privileges");
         }
     }

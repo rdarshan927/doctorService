@@ -1,6 +1,7 @@
 package com.example.doctorservice.controller;
 
-import com.example.doctorservice.model.DoctorSlot;
+import com.example.doctorservice.dto.ReserveSlotRequest;
+import com.example.doctorservice.dto.SlotResponse;
 import com.example.doctorservice.service.SlotService;
 import com.example.doctorservice.util.AuthHelper;
 import org.springframework.http.ResponseEntity;
@@ -21,19 +22,19 @@ public class SlotController {
     }
 
     @GetMapping("/{slotId}")
-    public ResponseEntity<DoctorSlot> getSlot(@RequestHeader("Authorization") String authHeader, @PathVariable UUID slotId) {
+    public ResponseEntity<SlotResponse> getSlot(@RequestHeader("Authorization") String authHeader, @PathVariable UUID slotId) {
         authHelper.requireAuth(authHeader);
         return ResponseEntity.ok(slotService.getSlotById(slotId));
     }
 
     @PostMapping("/{slotId}/reserve")
-    public ResponseEntity<DoctorSlot> reserveSlot(@RequestHeader("Authorization") String authHeader, @PathVariable UUID slotId, @RequestBody DoctorSlot slotData) {
+    public ResponseEntity<SlotResponse> reserveSlot(@RequestHeader("Authorization") String authHeader, @PathVariable UUID slotId, @RequestBody ReserveSlotRequest request) {
         authHelper.requireAuth(authHeader);
-        return ResponseEntity.ok(slotService.reserveSlot(slotId, slotData));
+        return ResponseEntity.ok(slotService.reserveSlot(slotId, request));
     }
 
     @PostMapping("/{slotId}/release")
-    public ResponseEntity<DoctorSlot> releaseSlot(@RequestHeader("Authorization") String authHeader, @PathVariable UUID slotId) {
+    public ResponseEntity<SlotResponse> releaseSlot(@RequestHeader("Authorization") String authHeader, @PathVariable UUID slotId) {
         authHelper.requireAuth(authHeader);
         return ResponseEntity.ok(slotService.releaseSlot(slotId));
     }
